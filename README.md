@@ -11,6 +11,7 @@
 | | |
 |---|---|
 | 🔄 **Live model picker** | Fetches `/v1/models` from your running server and shows a floating dropdown — click to set |
+| 🎲 **Seed control** | `fixed` / `increment` / `decrement` / `randomize` — the seed is sent to llama-swap so a run can be reproduced exactly |
 | 🖼️ **Vision support** | Connect any ComfyUI `IMAGE` node; the first frame is base64-encoded and sent as `image_url` |
 | 🧠 **Thinking extraction** | `<think>` / `<thinking>` blocks are **stripped** from `response` and surfaced in a separate `thinking` output |
 | ⏏️ **Auto-unload toggle** | Calls `/unload` automatically after every generation — great for VRAM-constrained setups |
@@ -31,6 +32,8 @@ The main inference node.
 | `system_prompt` | STRING (multiline) | System role message |
 | `prompt` | STRING (multiline) | User message / question |
 | `unload_after_generate` | BOOLEAN | Auto-call `/unload` after every run |
+| `seed` | INT | Sampling seed (default `0`). `0` = seed left out of the request, llama-swap picks one. Any other value reproduces the same output |
+| `control_after_generate` | COMBO | `fixed` / `increment` / `decrement` / `randomize` (default `randomize`) |
 | `image` *(optional)* | IMAGE | Vision input — first frame sent as JPEG base64 |
 
 | Output | Description |
@@ -81,6 +84,23 @@ thinking  →  full reasoning trace for inspection / debugging
 ```
 
 Both `<think>` and `<thinking>` variants are handled.
+
+---
+
+## 🎲 Reproducing a Generation
+
+The resolved seed is sent as the OpenAI-compatible `seed` field:
+
+```json
+{"model": "qwen3.6-35b-uncensored-nothink", "messages": [{"role": "user", "content": "..."}], "seed": 1234, "stream": false}
+```
+
+To re-run the exact same completion, set `control_after_generate` to **`fixed`** and keep the
+seed value. `increment` and `decrement` step the seed per run (wrapping around), while
+`randomize` — the default — picks a fresh seed each run.
+
+> Note: reproducibility also depends on the model, its quantization and the sampling
+> parameters being identical, since the seed alone does not pin those down.
 
 ---
 
