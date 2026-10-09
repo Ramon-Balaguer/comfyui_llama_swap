@@ -10,6 +10,7 @@ DEFAULT_URL = "http://localhost:8080"
 
 MAX_SEED = 0xFFFFFFFF
 SEED_CONTROLS = ["fixed", "increment", "decrement", "randomize"]
+THINKING_MODES = ["auto", "on", "off"]
 
 
 def _apply_seed_control(seed: int, control: str) -> int:
@@ -87,6 +88,10 @@ class LlamaSwapClient:
                     "default": "randomize",
                     "tooltip": "How the seed changes on each run",
                 }),
+                "thinking": (THINKING_MODES, {
+                    "default": "auto",
+                    "tooltip": "auto: leave it to the model/template. on/off: ask the template to enable or skip thinking (Qwen3-style templates)",
+                }),
             },
             "optional": {
                 "image": ("IMAGE", {
@@ -96,7 +101,7 @@ class LlamaSwapClient:
         }
 
     def generate(self, server_url, model, system_prompt, prompt, unload_after_generate,
-                 seed=0, control_after_generate="randomize", image=None):
+                 seed=0, control_after_generate="randomize", thinking="auto", image=None):
         base_url = server_url.rstrip("/")
         messages = []
 
@@ -119,6 +124,9 @@ class LlamaSwapClient:
         resolved_seed = _apply_seed_control(int(seed), control_after_generate)
         if resolved_seed > 0:
             payload["seed"] = resolved_seed
+
+        if thinking != "auto":
+            payload["chat_template_kwargs"] = {"enable_thinking": thinking == "on"}
 
         try:
             r = requests.post(

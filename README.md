@@ -34,6 +34,7 @@ The main inference node.
 | `unload_after_generate` | BOOLEAN | Auto-call `/unload` after every run |
 | `seed` | INT | Sampling seed (default `0`). `0` = seed left out of the request, llama-swap picks one. Any other value reproduces the same output |
 | `control_after_generate` | COMBO | `fixed` / `increment` / `decrement` / `randomize` (default `randomize`) |
+| `thinking` | COMBO | `auto` / `on` / `off` (default `auto`). `auto` leaves thinking to the model/template. `on` / `off` send `chat_template_kwargs.enable_thinking` to ask the template to enable or skip thinking. Only templates that read `enable_thinking` (e.g. Qwen3) respond to it |
 | `image` *(optional)* | IMAGE | Vision input — first frame sent as JPEG base64 |
 
 | Output | Description |
